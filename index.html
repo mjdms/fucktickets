@@ -2,11 +2,10 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1161a6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="moBiLET" />
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./mobilet.png" />
@@ -24,7 +23,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #ffffff;
+      background: #1161a6;
     }
 
     body {
@@ -35,25 +34,23 @@
       overscroll-behavior: none;
     }
 
-    /* Główny kontener z użyciem nowoczesnego 100dvh */
     #app {
       width: 100%;
       height: 100%;
-      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       background: #ffffff;
     }
 
-    /* Header */
+    /* Header — czysty, jednolicie niebieski */
     #header {
       background: #1161a6;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      padding-top: calc(env(safe-area-inset-top, 47px) + 8px);
-      padding-bottom: 8px;
+      padding-top: 14px;
+      padding-bottom: 10px;
       padding-left: 10px;
       padding-right: 10px;
       flex-shrink: 0;
@@ -88,7 +85,7 @@
       flex-direction: column;
       align-items: center;
       padding: 2px 0;
-      padding-bottom: 20px;
+      padding-bottom: 25px;
     }
 
     /* Karta biletu */
@@ -288,7 +285,7 @@
   }
   function dot(x, y, size, pd=0) {
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) {
-      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-1)!==0 && c%(size-3)===1);
+      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-3)===1 && c%(size-1)!==0);
       set(x+r, y+c, !light);
     }
     const up=pd&DIR.UP, dn=pd&DIR.DOWN, lt=pd&DIR.LEFT, rt=pd&DIR.RIGHT;
