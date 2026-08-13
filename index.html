@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#1161a6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -11,18 +11,22 @@
   <link rel="apple-touch-icon" href="./mobilet.png" />
   <title>moBiLET</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html {
-      height: 100%;
-      height: -webkit-fill-available;
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    body {
+
+    html, body {
+      width: 100%;
       height: 100%;
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
       background: #ffffff;
+    }
+
+    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       -webkit-user-select: none;
       user-select: none;
@@ -30,10 +34,11 @@
       overscroll-behavior: none;
     }
 
-    /* Główny kontener — klei się do krawędzi ekranu niezależnie od body */
+    /* Główny kontener z użyciem nowoczesnego 100dvh */
     #app {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       background: #ffffff;
@@ -82,7 +87,7 @@
       flex-direction: column;
       align-items: center;
       padding: 2px 0;
-      padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 20px);
+      padding-bottom: 20px;
     }
 
     /* Karta biletu */
