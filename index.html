@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#1161a6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -24,7 +24,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #ffffff;
+      background: #1161a6;
     }
 
     body {
@@ -42,7 +42,7 @@
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      background: #ffffff;
+      background: #1161a6;
     }
 
     /* Header */
@@ -288,7 +288,7 @@
   }
   function dot(x, y, size, pd=0) {
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) {
-      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-1)!==0 && c%(size-3)===1);
+      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-3)===1 && c%(size-1)!==0);
       set(x+r, y+c, !light);
     }
     const up=pd&DIR.UP, dn=pd&DIR.DOWN, lt=pd&DIR.LEFT, rt=pd&DIR.RIGHT;
