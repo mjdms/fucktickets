@@ -123,11 +123,13 @@
       align-items: center;
       justify-content: center;
       margin: 2px 0 14px 0;
+      cursor: pointer;
     }
     #qr-canvas {
       background: #fff;
       padding: 8px;
       display: block;
+      cursor: pointer;
     }
 
     /* Pola danych */
@@ -381,6 +383,7 @@
 // ─── Double Tap QR Code Toggle (Ulg. <-> Norm.) + LocalStorage ────────────────
 (function setupQRToggle() {
   const qrSection = document.getElementById('qr-section');
+  const qrCanvas = document.getElementById('qr-canvas');
   const ticketTextEl = document.getElementById('ticket-type-1');
   
   // Wczytaj zapisaną preferencję z localStorage (domyślnie Ulg.)
@@ -403,19 +406,24 @@
     updateDisplay();
   }
 
-  // Desktop double click
-  qrSection.addEventListener('dblclick', toggleType);
+  let clickCount = 0;
+  let clickTimer = null;
 
-  // Mobile double tap
-  let lastTap = 0;
-  qrSection.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (now - lastTap < 300 && now - lastTap > 0) {
-      e.preventDefault();
+  function handleTap(e) {
+    clickCount++;
+    if (clickCount === 1) {
+      clickTimer = setTimeout(() => {
+        clickCount = 0;
+      }, 400);
+    } else if (clickCount >= 2) {
+      clearTimeout(clickTimer);
+      clickCount = 0;
       toggleType();
     }
-    lastTap = now;
-  });
+  }
+
+  if (qrSection) qrSection.addEventListener('click', handleTap);
+  if (qrCanvas) qrCanvas.addEventListener('click', handleTap);
 })();
 
 // ─── Service Worker ───────────────────────────────────────────────────────────
