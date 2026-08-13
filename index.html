@@ -49,7 +49,7 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      padding-top: 14px;
+      padding-top: 7px;
       padding-bottom: 10px;
       padding-left: 10px;
       padding-right: 10px;
@@ -198,12 +198,12 @@
         </div>
 
         <!-- 3. Nazwa + timer w górę -->
-        <div class="field" style="margin-top:10px; margin-bottom:14px;">
+        <div class="field" style="margin-top:10px; margin-bottom:18px;">
           <div class="field-row">
             <span class="label">Nazwa:</span>
             <span class="timer-text" id="timer-up">10:00</span>
           </div>
-          <span class="value" style="margin-top: -4px;">Miasto Gorzów Wlkp. Komunikacja miejska</span>
+          <span class="value">Miasto Gorzów Wlkp. Komunikacja miejska</span>
         </div>
 
         <!-- 4. Bilet -->
@@ -410,11 +410,12 @@
   let clickTimer = null;
 
   function handleTap(e) {
+    if (e) e.stopPropagation();
     clickCount++;
     if (clickCount === 1) {
       clickTimer = setTimeout(() => {
         clickCount = 0;
-      }, 400);
+      }, 300);
     } else if (clickCount >= 2) {
       clearTimeout(clickTimer);
       clickCount = 0;
@@ -422,8 +423,10 @@
     }
   }
 
-  if (qrSection) qrSection.addEventListener('click', handleTap);
-  if (qrCanvas) qrCanvas.addEventListener('click', handleTap);
+  const target = qrCanvas || qrSection;
+  if (target) {
+    target.addEventListener('click', handleTap);
+  }
 })();
 
 // ─── Service Worker ───────────────────────────────────────────────────────────
