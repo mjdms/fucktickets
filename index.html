@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1161a6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="moBiLET" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./mobilet.png" />
+  <title>moBiLET</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      height: 100%;
+      height: -webkit-fill-available;
+    }
+    body {
+      height: 100%;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow: hidden;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+
+    /* Główny kontener — klei się do krawędzi ekranu niezależnie od body */
+    #app {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+
+    /* Header */
+    #header {
+      background: #1161a6;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: calc(env(safe-area-inset-top, 47px) + 8px);
+      padding-bottom: 8px;
+      padding-left: 10px;
+      padding-right: 10px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    #back-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 120px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    #back-btn img { width: 24px; height: 24px; margin-left: 6px; }
+    #back-btn span { color: white; font-size: 20px; font-weight: 400; }
+    #logo-container { flex: 1; display: flex; align-items: center; justify-content: center; }
+    #logo-container img { width: 100px; height: 30px; object-fit: contain; }
+    #placeholder { width: 120px; }
+
+    /* Scroll area */
+    #scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      background: #ffffff;
+    }
+    #scroll-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2px 0;
+      padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 16px);
+    }
+
+    /* Karta biletu */
+    #ticket {
+      background: #ffffff;
+      padding: 8px 14px;
+      width: 96%;
+      max-width: 380px;
+    }
+
+    /* Banner wrapper — latające logo */
+    .banner-wrapper {
+      height: 48px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      margin: -2px -14px 15px -14px;
+      position: relative;
+    }
+    #banner-img {
+      width: 68px;
+      height: 58px;
+      object-fit: contain;
+      position: absolute;
+    }
+
+    /* QR sekcja */
+    #qr-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px 0 14px 0;
+    }
+    #qr-canvas {
+      background: #fff;
+      padding: 8px;
+      display: block;
+    }
+
+    /* Pola danych */
+    .field { margin-bottom: 14px; }
+    .field-row { display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+    .label {
+      color: #999999;
+      font-size: 12px;
+      font-weight: 400;
+      margin-bottom: 1px;
+      display: block;
+    }
+    .value {
+      color: #000000;
+      font-size: 14px;
+      font-weight: 700;
+      display: block;
+    }
+    .timer-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #000000;
+      margin-top: -4px;
+    }
+
+    /* Przycisk */
+    #prolong-btn {
+      background: #1161a6;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 400;
+      border: none;
+      border-radius: 0;
+      padding: 13px 42px;
+      cursor: pointer;
+      display: block;
+      margin: 8px auto 20px auto;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <button id="back-btn">
+      <img src="./image.png" alt="back" />
+      <span>Back</span>
+    </button>
+    <div id="logo-container">
+      <img src="./cJ.png" alt="logo" />
+    </div>
+    <div id="placeholder"></div>
+  </div>
+
+  <div id="scroll-area">
+    <div id="scroll-content">
+      <div id="ticket">
+
+        <!-- 1. Latające logo -->
+        <div class="banner-wrapper" id="banner-top">
+          <img id="banner-img" src="./banner.png" alt="banner" />
+        </div>
+
+        <!-- 2. Kod QR -->
+        <div id="qr-section">
+          <canvas id="qr-canvas" width="255" height="255"></canvas>
+        </div>
+
+        <!-- 3. Nazwa + timer w górę -->
+        <div class="field" style="margin-top:10px; margin-bottom:18px;">
+          <div class="field-row">
+            <span class="label">Nazwa:</span>
+            <span class="timer-text" id="timer-up">10:00</span>
+          </div>
+          <span class="value">Miasto Gorzów Wlkp. Komunikacja miejska</span>
+        </div>
+
+        <!-- 4. Bilet -->
+        <div class="field">
+          <span class="label" style="margin-bottom:8px;">Bilet:</span>
+          <span class="value">45 min jedn. Ulg. w gr.adm. Miasta Gorzów</span>
+          <span class="value">Wlkp. Miasto</span>
+        </div>
+
+        <!-- 5. Line number -->
+        <div class="field">
+          <span class="label" style="margin-bottom:3px;">line number:</span>
+          <span class="value" id="line-num">638</span>
+        </div>
+
+        <!-- 6. Czas skasowania -->
+        <div class="field">
+          <span class="label">Czas skasowania:</span>
+          <span class="value" id="cancel-date">--.--.----r. --:--:--</span>
+        </div>
+
+        <!-- 7. Czas ważności (odliczanie w dół) -->
+        <div class="field">
+          <span class="label">Czas ważności:</span>
+          <span class="value" id="timer-down">35:00</span>
+        </div>
+
+        <!-- 8. Ważny do -->
+        <div class="field">
+          <span class="label">Ważny do:</span>
+          <span class="value" id="valid-date">--.--.----r. --:--:--</span>
+        </div>
+
+        <!-- 9. Numer bieżący -->
+        <div class="field" style="margin-top:-5px;">
+          <span class="label">Numer bieżący:</span>
+          <span class="value" id="current-num">---------</span>
+        </div>
+
+        <!-- 10. Numer kontrolny -->
+        <div class="field" style="margin-top:-5px;">
+          <span class="label">Numer kontrolny:</span>
+          <span class="value" id="control-num">-----</span>
+        </div>
+
+        <!-- 11. Drugie latające logo -->
+        <div class="banner-wrapper" id="banner-bottom" style="margin-top:-7px; margin-bottom:3px;">
+          <img id="banner-img-2" src="./banner.png" alt="banner" />
+        </div>
+
+        <!-- 12. Cena -->
+        <div class="field">
+          <span class="label">Cena:</span>
+          <span class="value">5.00 PLN</span>
+        </div>
+
+        <!-- 13. Czas zakupu -->
+        <div class="field" style="margin-bottom:20px;">
+          <span class="label">Czas zakupu:</span>
+          <span class="value" id="buy-date">--.--.----r. --:--:--</span>
+        </div>
+
+        <!-- Przycisk -->
+        <button id="prolong-btn">Prolong ticket</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Pseudo QR ────────────────────────────────────────────────────────────────
+(function drawQR() {
+  const MODULE_COUNT = 41;
+  const EDGE = 7, ALIGN = 5, ALIGN_PAD = 4, ALIGN_MAX = 23;
+  const DIR = { UP:1, DOWN:2, LEFT:4, RIGHT:8 };
+  const grid = Array.from({length: MODULE_COUNT}, () => Array(MODULE_COUNT).fill(false));
+
+  function set(r, c, v) {
+    if (r>=0 && r<MODULE_COUNT && c>=0 && c<MODULE_COUNT) grid[r][c] = v;
+  }
+  function dot(x, y, size, pd=0) {
+    for (let r=0; r<size; r++) for (let c=0; c<size; c++) {
+      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-3)===1 && c%(size-1)!==0);
+      set(x+r, y+c, !light);
+    }
+    const up=pd&DIR.UP, dn=pd&DIR.DOWN, lt=pd&DIR.LEFT, rt=pd&DIR.RIGHT;
+    const sa=up?-1:0, ea=dn?1:0;
+    if(up) for(let i=0;i<size;i++) set(x-1,y+i,false);
+    if(dn) for(let i=0;i<size;i++) set(x+size,y+i,false);
+    if(lt) for(let i=sa;i<size+ea;i++) set(x+i,y-1,false);
+    if(rt) for(let i=sa;i<size+ea;i++) set(x+i,y+size,false);
+  }
+
+  for(let r=0;r<MODULE_COUNT;r++) for(let c=0;c<MODULE_COUNT;c++) grid[r][c]=Math.random()>0.5;
+
+  const ep = MODULE_COUNT-EDGE;
+  dot(0,0,EDGE,DIR.DOWN|DIR.RIGHT);
+  dot(0,ep,EDGE,DIR.DOWN|DIR.LEFT);
+  dot(ep,0,EDGE,DIR.UP|DIR.RIGHT);
+
+  if(MODULE_COUNT>=25){
+    const bp=MODULE_COUNT-ALIGN_PAD-ALIGN;
+    const cnt=Math.ceil((MODULE_COUNT-2*ALIGN_PAD+ALIGN_MAX)/(ALIGN_MAX+ALIGN));
+    let sp=Math.round((MODULE_COUNT-2*ALIGN_PAD-cnt*ALIGN)/(cnt-1));
+    if(sp%2===0) sp++;
+    for(let i=0;i<cnt-1;i++) for(let j=0;j<cnt-1;j++)
+      if(i+j>0) dot(bp-(sp+ALIGN)*i, bp-(sp+ALIGN)*j, ALIGN);
+    for(let i=1;i<cnt-1;i++) dot(ALIGN_PAD, bp-(sp+ALIGN)*i, ALIGN);
+    for(let i=1;i<cnt-1;i++) dot(bp-(sp+ALIGN)*i, ALIGN_PAD, ALIGN);
+  }
+
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const sz = 255;
+  const ms = sz / MODULE_COUNT;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,sz,sz);
+  ctx.fillStyle = '#000';
+  for(let r=0;r<MODULE_COUNT;r++) for(let c=0;c<MODULE_COUNT;c++)
+    if(grid[r][c]) ctx.fillRect(c*ms, r*ms, ms+0.5, ms+0.5);
+})();
+
+// ─── Dane biletu ──────────────────────────────────────────────────────────────
+(function initTicket() {
+  const pad = n => n.toString().padStart(2,'0');
+  const fmt = d => `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}r. ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+  const now = new Date();
+  const cancelTime = new Date(now.getTime() - 10*60000);
+  const buyTime = new Date(cancelTime.getTime() - 30000);
+  const validTime = new Date(cancelTime.getTime() + 45*60000);
+  const cNum = Math.floor(Math.random()*900000000)+100000000;
+  const ctrlNum = Math.floor(Math.random()*(80000-25000+1))+25000;
+
+  document.getElementById('cancel-date').textContent = fmt(cancelTime);
+  document.getElementById('valid-date').textContent = fmt(validTime);
+  document.getElementById('buy-date').textContent = fmt(buyTime);
+  document.getElementById('current-num').textContent = cNum.toString();
+  document.getElementById('control-num').textContent = ctrlNum.toString();
+
+  // Timery
+  const upEl = document.getElementById('timer-up');
+  const dnEl = document.getElementById('timer-down');
+  setInterval(() => {
+    const elapsed = Math.floor((Date.now() - cancelTime.getTime()) / 1000);
+    const up = Math.min(Math.max(elapsed,0), 45*60);
+    const dn = Math.max(45*60 - elapsed, 0);
+    upEl.textContent = `${Math.floor(up/60)}:${pad(up%60)}`;
+    dnEl.textContent = `${Math.floor(dn/60)}:${pad(dn%60)}`;
+  }, 1000);
+})();
+
+// ─── Animacja banerów ─────────────────────────────────────────────────────────
+(function animateBanners() {
+  const W = window.innerWidth;
+  const banners = [
+    { img: document.getElementById('banner-img'),   wrapper: document.getElementById('banner-top') },
+    { img: document.getElementById('banner-img-2'), wrapper: document.getElementById('banner-bottom') },
+  ];
+
+  // Ustaw szerokość wrapperów na pełny ekran
+  banners.forEach(({wrapper}) => {
+    wrapper.style.width = W + 'px';
+    wrapper.style.marginLeft = `-14px`;
+    // override żeby rozciągał się przez cały ekran niezależnie od padding karty
+    const ticket = document.getElementById('ticket');
+    const ticketLeft = ticket.getBoundingClientRect().left;
+    wrapper.style.marginLeft = `-${ticketLeft + 14}px`;
+  });
+
+  let start = null;
+  const DURATION = 3500; // ms na jeden przejazd
+
+  function step(ts) {
+    if (!start) start = ts;
+    const elapsed = (ts - start) % DURATION;
+    const x = -68 + (W + 68) * (elapsed / DURATION);
+    banners.forEach(({img}) => {
+      img.style.transform = `translateX(${x}px)`;
+    });
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
+
+// ─── Service Worker ───────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js');
+  });
+}
+</script>
+</body>
+</html>
