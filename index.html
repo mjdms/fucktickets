@@ -82,7 +82,7 @@
       flex-direction: column;
       align-items: center;
       padding: 2px 0;
-      padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 16px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 34px) + 20px);
     }
 
     /* Karta biletu */
@@ -91,18 +91,23 @@
       padding: 8px 14px;
       width: 96%;
       max-width: 380px;
+      position: relative;
     }
 
-    /* Banner wrapper — latające logo */
+    /* Banner wrapper — rozciąga się na pełną szerokość ekranu 100vw */
     .banner-wrapper {
       height: 48px;
       overflow: hidden;
       display: flex;
       align-items: center;
-      margin: -2px -14px 15px -14px;
       position: relative;
+      width: 100vw;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
     }
-    #banner-img {
+    .banner-img {
       width: 68px;
       height: 58px;
       object-fit: contain;
@@ -178,8 +183,8 @@
       <div id="ticket">
 
         <!-- 1. Latające logo -->
-        <div class="banner-wrapper" id="banner-top">
-          <img id="banner-img" src="./banner.png" alt="banner" />
+        <div class="banner-wrapper" id="banner-top" style="margin-top:-2px; margin-bottom:15px;">
+          <img class="banner-img" id="banner-img" src="./banner.png" alt="banner" />
         </div>
 
         <!-- 2. Kod QR -->
@@ -241,7 +246,7 @@
 
         <!-- 11. Drugie latające logo -->
         <div class="banner-wrapper" id="banner-bottom" style="margin-top:-7px; margin-bottom:3px;">
-          <img id="banner-img-2" src="./banner.png" alt="banner" />
+          <img class="banner-img" id="banner-img-2" src="./banner.png" alt="banner" />
         </div>
 
         <!-- 12. Cena -->
@@ -277,7 +282,7 @@
   }
   function dot(x, y, size, pd=0) {
     for (let r=0; r<size; r++) for (let c=0; c<size; c++) {
-      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-3)===1 && c%(size-1)!==0);
+      const light = (c%(size-3)===1 && r%(size-1)!==0) || (r%(size-1)!==0 && c%(size-3)===1);
       set(x+r, y+c, !light);
     }
     const up=pd&DIR.UP, dn=pd&DIR.DOWN, lt=pd&DIR.LEFT, rt=pd&DIR.RIGHT;
@@ -349,21 +354,10 @@
 
 // ─── Animacja banerów ─────────────────────────────────────────────────────────
 (function animateBanners() {
-  const W = window.innerWidth;
-  const banners = [
-    { img: document.getElementById('banner-img'),   wrapper: document.getElementById('banner-top') },
-    { img: document.getElementById('banner-img-2'), wrapper: document.getElementById('banner-bottom') },
+  const imgs = [
+    document.getElementById('banner-img'),
+    document.getElementById('banner-img-2')
   ];
-
-  // Ustaw szerokość wrapperów na pełny ekran
-  banners.forEach(({wrapper}) => {
-    wrapper.style.width = W + 'px';
-    wrapper.style.marginLeft = `-14px`;
-    // override żeby rozciągał się przez cały ekran niezależnie od padding karty
-    const ticket = document.getElementById('ticket');
-    const ticketLeft = ticket.getBoundingClientRect().left;
-    wrapper.style.marginLeft = `-${ticketLeft + 14}px`;
-  });
 
   let start = null;
   const DURATION = 3500; // ms na jeden przejazd
@@ -371,9 +365,10 @@
   function step(ts) {
     if (!start) start = ts;
     const elapsed = (ts - start) % DURATION;
+    const W = window.innerWidth;
     const x = -68 + (W + 68) * (elapsed / DURATION);
-    banners.forEach(({img}) => {
-      img.style.transform = `translateX(${x}px)`;
+    imgs.forEach(img => {
+      if (img) img.style.transform = `translateX(${x}px)`;
     });
     requestAnimationFrame(step);
   }
