@@ -136,7 +136,7 @@
     .label {
       color: #999999;
       font-size: 12px;
-      font-weight: 100;
+      font-weight: 400;
       margin-bottom: 1px;
       display: block;
     }
@@ -164,8 +164,7 @@
       padding: 13px 42px;
       cursor: pointer;
       display: block;
-      margin: 8px auto 20px auto;
-      margin-bottom: 35px;
+      margin: 8px auto 35px auto;
     }
   </style>
 </head>
@@ -208,7 +207,7 @@
         <!-- 4. Bilet -->
         <div class="field">
           <span class="label" style="margin-bottom:8px;">Bilet:</span>
-          <span class="value">45 min jedn. Ulg. w gr.adm. Miasta Gorzów</span>
+          <span class="value" id="ticket-type-1">45 min jedn. Ulg. w gr.adm. Miasta Gorzów</span>
           <span class="value">Wlkp. Miasto</span>
         </div>
 
@@ -377,6 +376,46 @@
     requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
+})();
+
+// ─── Double Tap QR Code Toggle (Ulg. <-> Norm.) + LocalStorage ────────────────
+(function setupQRToggle() {
+  const qrSection = document.getElementById('qr-section');
+  const ticketTextEl = document.getElementById('ticket-type-1');
+  
+  // Wczytaj zapisaną preferencję z localStorage (domyślnie Ulg.)
+  let isNormal = localStorage.getItem('ticketType') === 'Norm';
+
+  function updateDisplay() {
+    if (ticketTextEl) {
+      ticketTextEl.textContent = isNormal
+        ? '45 min jedn. Norm. w gr.adm. Miasta Gorzów'
+        : '45 min jedn. Ulg. w gr.adm. Miasta Gorzów';
+    }
+  }
+
+  // Ustaw początkowy tekst według localStorage
+  updateDisplay();
+
+  function toggleType() {
+    isNormal = !isNormal;
+    localStorage.setItem('ticketType', isNormal ? 'Norm' : 'Ulg');
+    updateDisplay();
+  }
+
+  // Desktop double click
+  qrSection.addEventListener('dblclick', toggleType);
+
+  // Mobile double tap
+  let lastTap = 0;
+  qrSection.addEventListener('touchend', (e) => {
+    const now = Date.now();
+    if (now - lastTap < 300 && now - lastTap > 0) {
+      e.preventDefault();
+      toggleType();
+    }
+    lastTap = now;
+  });
 })();
 
 // ─── Service Worker ───────────────────────────────────────────────────────────
